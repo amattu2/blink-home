@@ -1,8 +1,0 @@
-.git
-.github
-.githooks
-.vscode
-*.md
-
-bin
-docs
