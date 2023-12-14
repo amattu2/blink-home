@@ -32,8 +32,12 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test --passWithNoTests --ci --watchAll=false",
     "lint": "biome check .",
-    "lint:fix": "biome check --apply ."
+    "lint:fix": "biome check --apply .",
+    "lint:ci": "biome ci .",
+    "prepare": "husky install"
   },
   "browserslist": {
     "production": [
@@ -48,6 +52,7 @@
     ]
   },
   "devDependencies": {
-    "@biomejs/biome": "1.4.1"
+    "@biomejs/biome": "1.4.1",
+    "husky": "^8.0.0"
   }
 }
