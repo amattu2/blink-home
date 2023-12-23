@@ -10,13 +10,17 @@ import { BASE_URL, ENDPOINT } from "./constants";
  * @param extras
  * @returns {Promise<LoginResponse>}
  */
-export const login = async (email: string, password: string, extras?: Omit<LoginBody, "email" | "password">): Promise<ApiSuccess<LoginResponse> | ApiError<LoginResponse>> => {
+export const login = async (
+  email: string,
+  password: string,
+  extras?: Omit<LoginBody, "email" | "password">,
+): Promise<ApiSuccess<LoginResponse> | ApiError<LoginResponse>> => {
   const response = await fetch(`${BASE_URL}${ENDPOINT.login}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password, ...extras, }),
+    body: JSON.stringify({ email, password, ...extras }),
   }).catch(() => null);
 
   const json = await response?.json()?.catch(() => null);

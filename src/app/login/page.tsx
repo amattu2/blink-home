@@ -4,8 +4,8 @@ import { Button, Form, Input, Layout } from "antd";
 import { FC } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
-import lang from "../../lang/en";
 import { login } from "@/api/actions";
+import lang from "../../lang/en";
 
 type FormFields = {
   email: string;
@@ -14,7 +14,10 @@ type FormFields = {
 
 const Login: FC = () => {
   const [uniqueId, setUniqueId] = useLocalStorage<string>("unique_Id", "");
-  const [account, setAccount] = useLocalStorage<Account>("account", {} as Account);
+  const [account, setAccount] = useLocalStorage<Account>(
+    "account",
+    {} as Account,
+  );
 
   const onFinish = async ({ email, password }: FormFields) => {
     const newUniqueId = uuidv4();

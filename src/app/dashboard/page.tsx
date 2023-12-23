@@ -1,7 +1,3 @@
 export default function Home() {
-  return (
-    <main>
-      dashboard
-    </main>
-  )
+  return <main>dashboard</main>;
 }

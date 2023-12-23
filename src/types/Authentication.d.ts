@@ -75,6 +75,9 @@ type LoginVerification = {
   };
 };
 
-type LoginFailure = Pick<LoginResponse, "allow_pin_resend_seconds" | "lockout_time_remaining"> & {
+type LoginFailure = Pick<
+  LoginResponse,
+  "allow_pin_resend_seconds" | "lockout_time_remaining"
+> & {
   message: string;
-}
+};
