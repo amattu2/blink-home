@@ -81,3 +81,7 @@ type LoginFailure = Pick<
 > & {
   message: string;
 };
+
+type VerifyLoginResponse = {
+  TODO: string;
+};

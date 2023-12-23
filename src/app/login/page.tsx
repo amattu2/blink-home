@@ -1,7 +1,8 @@
 "use client";
 
-import { Button, Form, Input, Layout } from "antd";
+import { Button, Form, Input, Layout, notification } from "antd";
 import { FC } from "react";
+import { useRouter } from "next/navigation";
 import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 import { login } from "@/api/actions";
@@ -13,11 +14,12 @@ type FormFields = {
 };
 
 const Login: FC = () => {
+  const router = useRouter();
+
+  const [api, contextHolder] = notification.useNotification();
   const [uniqueId, setUniqueId] = useLocalStorage<string>("unique_Id", "");
-  const [account, setAccount] = useLocalStorage<Account>(
-    "account",
-    {} as Account,
-  );
+  const [, setAccount] = useLocalStorage<Account>("account", {} as Account);
+  const [, setToken] = useLocalStorage<LoginAuth["token"]>("token", "");
 
   const onFinish = async ({ email, password }: FormFields) => {
     const newUniqueId = uuidv4();
@@ -35,29 +37,28 @@ const Login: FC = () => {
     };
 
     const r = await login(email, password, loginExtras);
-    console.log(r);
     if (r.status === "error") {
-      // TODO: show error message
-      console.warn(r);
+      api.error({ message: "Oops!", description: r.message });
       return;
     }
 
     setAccount(r.data.account);
+    setToken(r.data.auth.token);
     if (r.data?.account?.client_verification_required) {
-      // TODO: redirect to verification page
+      router.push("/2fa");
     } else {
-      // TODO: redirect to home page
+      router.push("/dashboard");
     }
   };
 
   return (
     <Layout style={{ height: "100%" }}>
+      {contextHolder}
       <Layout.Content>
         <Form<FormFields>
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
           onFinish={onFinish}
           autoComplete="off"
         >
