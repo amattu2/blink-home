@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 import { login } from "@/api/actions";
-import lang from "../../lang/en";
+import { AuthState } from "@/hocs/withAuth";
+import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
+import lang from "@/lang/en";
 
 type FormFields = {
   email: string;
@@ -18,8 +20,18 @@ const Login: FC = () => {
 
   const [api, contextHolder] = notification.useNotification();
   const [uniqueId, setUniqueId] = useLocalStorage<string>("unique_Id", "");
-  const [, setAccount] = useLocalStorage<Account>("account", {} as Account);
-  const [, setToken] = useLocalStorage<LoginAuth["token"]>("token", "");
+  const [, setAccount] = useLocalStorage<Account>(
+    STORAGE_KEYS.USER_ACCOUNT,
+    {} as Account,
+  );
+  const [, setToken] = useLocalStorage<LoginAuth["token"]>(
+    STORAGE_KEYS.USER_TOKEN,
+    "",
+  );
+  const [, setLoginState] = useLocalStorage<AuthState>(
+    STORAGE_KEYS.LOGIN_STATE,
+    "LOGGED_OUT",
+  );
 
   const onFinish = async ({ email, password }: FormFields) => {
     const newUniqueId = uuidv4();
@@ -45,8 +57,10 @@ const Login: FC = () => {
     setAccount(r.data.account);
     setToken(r.data.auth.token);
     if (r.data?.account?.client_verification_required) {
+      setLoginState("TWO_FACTOR");
       router.push("/2fa");
     } else {
+      setLoginState("LOGGED_IN");
       router.push("/dashboard");
     }
   };

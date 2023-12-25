@@ -83,5 +83,8 @@ type LoginFailure = Pick<
 };
 
 type VerifyLoginResponse = {
-  TODO: string;
+  code: number;
+  message: string;
+  require_new_pin: boolean;
+  valid: boolean;
 };

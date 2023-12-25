@@ -1,24 +1,46 @@
 "use client";
 
 import { Button, Form, Input, Layout, notification } from "antd";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useRouter } from "next/navigation";
+import { verifyLoginPin, resendLoginPin } from "@/api/actions";
+import lang from "@/lang/en";
+import withAuth, { AuthProps, AuthState } from "@/hocs/withAuth";
+import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import { useLocalStorage } from "usehooks-ts";
-import { verifyLoginPin } from "@/api/actions";
-import lang from "../../lang/en";
 
 type FormFields = {
   pin: number;
 };
 
-const Login: FC = () => {
+const TwoFactor: FC<AuthProps> = ({ account, token }) => {
   const router = useRouter();
 
   const [api, contextHolder] = notification.useNotification();
-  const [, setAccount] = useLocalStorage<Account>("account", {} as Account);
+  const [sendingPin, setSendingPin] = useState<boolean>(false);
+  const [loggingIn, setLoggingIn] = useState<boolean>(false);
+  const [, setLoginState] = useLocalStorage<AuthState>(
+    STORAGE_KEYS.LOGIN_STATE,
+    "LOGGED_OUT",
+  );
 
   const onFinish = async ({ pin }: FormFields) => {
-    console.log(pin);
+    setLoggingIn(true);
+    const r = await verifyLoginPin(pin, account, token);
+    if (r.status === "error") {
+      api.error({ message: "Oops!", description: r.message });
+      return;
+    }
+
+    setLoggingIn(false);
+    setLoginState("LOGGED_IN");
+    router.push("/dashboard");
+  };
+
+  const resendPin = async () => {
+    setSendingPin(true);
+    await resendLoginPin(account, token);
+    setSendingPin(false);
   };
 
   return (
@@ -40,10 +62,15 @@ const Login: FC = () => {
             <Input type="number" />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={loggingIn}>
               Submit
             </Button>
-            <Button type="text" htmlType="button">
+            <Button
+              type="text"
+              htmlType="button"
+              loading={sendingPin}
+              onClick={resendPin}
+            >
               Resend
             </Button>
           </Form.Item>
@@ -53,4 +80,4 @@ const Login: FC = () => {
   );
 };
 
-export default Login;
+export default withAuth(TwoFactor, ["TWO_FACTOR"]);
