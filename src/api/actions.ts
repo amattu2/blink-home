@@ -3,6 +3,10 @@
 import { BASE_URL, ENDPOINT } from "./constants";
 import { formatUrl } from "./utils";
 
+export const config = {
+  runtime: "experimental-edge",
+};
+
 /**
  * Perform a login request
  *
