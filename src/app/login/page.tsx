@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 import { login } from "@/api/actions";
-import { AuthState } from "@/hocs/withAuth";
 import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import lang from "@/lang/en";
 
@@ -27,10 +26,6 @@ const Login: FC = () => {
   const [, setToken] = useLocalStorage<LoginAuth["token"]>(
     STORAGE_KEYS.USER_TOKEN,
     "",
-  );
-  const [, setLoginState] = useLocalStorage<AuthState>(
-    STORAGE_KEYS.LOGIN_STATE,
-    "LOGGED_OUT",
   );
 
   const onFinish = async ({ email, password }: FormFields) => {
@@ -57,10 +52,8 @@ const Login: FC = () => {
     setAccount(r.data.account);
     setToken(r.data.auth.token);
     if (r.data?.account?.client_verification_required) {
-      setLoginState("TWO_FACTOR");
       router.push("/2fa");
     } else {
-      setLoginState("LOGGED_IN");
       router.push("/dashboard");
     }
   };

@@ -5,27 +5,22 @@ import { FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import { verifyLoginPin, resendLoginPin } from "@/api/actions";
 import lang from "@/lang/en";
-import withAuth, { AuthProps, AuthState } from "@/hocs/withAuth";
-import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
-import { useLocalStorage } from "usehooks-ts";
+import withAuth, { AuthHocProps } from "@/hocs/withAuth";
 
 type FormFields = {
   pin: number;
 };
 
-const TwoFactor: FC<AuthProps> = ({ account, token }) => {
+const TwoFactor: FC<AuthHocProps> = ({ account, token, setAccount }) => {
   const router = useRouter();
 
   const [api, contextHolder] = notification.useNotification();
   const [sendingPin, setSendingPin] = useState<boolean>(false);
   const [loggingIn, setLoggingIn] = useState<boolean>(false);
-  const [, setLoginState] = useLocalStorage<AuthState>(
-    STORAGE_KEYS.LOGIN_STATE,
-    "LOGGED_OUT",
-  );
 
   const onFinish = async ({ pin }: FormFields) => {
     setLoggingIn(true);
+
     const r = await verifyLoginPin(pin, account, token);
     if (r.status === "error") {
       api.error({ message: "Oops!", description: r.message });
@@ -33,7 +28,7 @@ const TwoFactor: FC<AuthProps> = ({ account, token }) => {
     }
 
     setLoggingIn(false);
-    setLoginState("LOGGED_IN");
+    setAccount({ client_verification_required: false });
     router.push("/dashboard");
   };
 

@@ -88,3 +88,7 @@ type VerifyLoginResponse = {
   require_new_pin: boolean;
   valid: boolean;
 };
+
+type LogoutResponse = {
+  message: string;
+};

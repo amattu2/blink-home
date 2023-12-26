@@ -84,6 +84,13 @@ export const verifyLoginPin = async (
   };
 };
 
+/**
+ * Resend the 2FA login pin
+ *
+ * @param account Current account
+ * @param token API token
+ * @returns {Promise<VerifyLoginResponse>}
+ */
 export const resendLoginPin = async (
   account: Account,
   token: LoginAuth["token"],
@@ -110,5 +117,41 @@ export const resendLoginPin = async (
   return {
     status: "ok",
     data: json as VerifyLoginResponse,
+  };
+};
+
+/**
+ * Perform an API logout request
+ *
+ * @param account The current account
+ * @param token The session API token
+ * @returns {Promise<LogoutResponse>}
+ */
+export const logout = async (
+  account: Account,
+  token: LoginAuth["token"],
+): Promise<ApiSuccess<LogoutResponse> | ApiError<LogoutResponse>> => {
+  const url = formatUrl(BASE_URL, ENDPOINT.logout, account);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "TOKEN-AUTH": token,
+    },
+  }).catch(() => null);
+
+  const json = await response?.json()?.catch(() => null);
+
+  if (!response || !response.ok || json?.message !== "logout") {
+    return {
+      status: "error",
+      message: json?.message ?? "Unknown error",
+      data: json,
+    };
+  }
+
+  return {
+    status: "ok",
+    data: json as LogoutResponse,
   };
 };

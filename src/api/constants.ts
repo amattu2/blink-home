@@ -6,4 +6,5 @@ export const ENDPOINT = {
     "api/v4/account/{{account_id}}/client/{{client_id}}/pin/verify",
   resendLoginPin:
     "api/v4/account/{{account_id}}/client/{{client_id}}/pin/resend",
+  logout: "api/v4/account/{{account_id}}/client/{{client_id}}/logout",
 };
