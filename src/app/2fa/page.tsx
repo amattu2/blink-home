@@ -5,13 +5,13 @@ import { FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import { verifyLoginPin, resendLoginPin } from "@/api/actions";
 import lang from "@/lang/en";
-import withAuth, { AuthHocProps } from "@/hocs/withAuth";
+import withAuth from "@/hocs/withAuth";
 
 type FormFields = {
   pin: number;
 };
 
-const TwoFactor: FC<AuthHocProps> = ({ account, token, setAccount }) => {
+const TwoFactor: FC = () => {
   const router = useRouter();
 
   const [api, contextHolder] = notification.useNotification();
@@ -21,21 +21,23 @@ const TwoFactor: FC<AuthHocProps> = ({ account, token, setAccount }) => {
   const onFinish = async ({ pin }: FormFields) => {
     setLoggingIn(true);
 
-    const r = await verifyLoginPin(pin, account, token);
+    const r = await verifyLoginPin(pin);
     if (r.status === "error") {
       api.error({ message: "Oops!", description: r.message });
       return;
     }
 
-    setLoggingIn(false);
-    setAccount({ client_verification_required: false });
     router.push("/dashboard");
   };
 
   const resendPin = async () => {
     setSendingPin(true);
-    await resendLoginPin(account, token);
+    const r = await resendLoginPin();
     setSendingPin(false);
+
+    if (r.status === "error") {
+      api.error({ message: "Oops!", description: r.message });
+    }
   };
 
   return (

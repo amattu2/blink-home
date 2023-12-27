@@ -1,11 +1,7 @@
 "use server";
 
 import { BASE_URL, ENDPOINT } from "./constants";
-import { formatUrl } from "./utils";
-
-export const config = {
-  runtime: "experimental-edge",
-};
+import { buildIronSession, formatUrl } from "./utils";
 
 /**
  * Perform a login request
@@ -13,35 +9,62 @@ export const config = {
  * @param email
  * @param password
  * @param extras
- * @returns {Promise<LoginResponse>}
+ * @returns {Promise<LoginApiResponse>}
  */
 export const login = async (
   email: string,
   password: string,
-  extras?: Omit<LoginBody, "email" | "password">,
-): Promise<ApiSuccess<LoginResponse> | ApiError<LoginResponse>> => {
+  extras: Omit<
+    LoginBody,
+    "email" | "password" | "unique_Id" | "client_name" | "reauth"
+  >,
+): Promise<ApiSuccess<LoginApiResponse> | ApiError<LoginApiResponse>> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_OUT") {
+    return {
+      status: "error",
+      message: "Already logged in",
+      two_factor_auth: session.state === "TWO_FACTOR",
+    };
+  }
+
   const url = formatUrl(BASE_URL, ENDPOINT.login);
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password, ...extras }),
+    body: JSON.stringify({
+      email,
+      password,
+      ...extras,
+      unique_Id: session.client_id,
+      client_name: "blink-test", // TODO: Move to env
+      reauth: session.reauth,
+    }),
   }).catch(() => null);
 
   const json = await response?.json()?.catch(() => null);
 
-  if (!response || !response.ok || !json) {
+  if (!response || !response.ok || !json || !json?.account?.account_id) {
     return {
       status: "error",
       message: json?.message ?? "Unknown error",
-      data: json,
+      two_factor_auth: false,
     };
   }
 
+  session.state = json?.account?.client_verification_required
+    ? "TWO_FACTOR"
+    : "LOGGED_IN";
+  session.account = json?.account;
+  session.reauth = true;
+  session.token = json?.auth?.token;
+  await session.save();
+
   return {
     status: "ok",
-    data: json as LoginResponse,
+    two_factor_auth: json?.account?.client_verification_required,
   };
 };
 
@@ -49,21 +72,27 @@ export const login = async (
  * Verify a login request using a pin (2fa)
  *
  * @param pin The pin to verify
- * @param account The account to verify the pin for
- * @param token The API token to use
- * @returns {Promise<VerifyLoginResponse>}
+ * @returns {Promise<TwoFactorApiResponse>}
  */
 export const verifyLoginPin = async (
   pin: number,
-  account: Account,
-  token: LoginAuth["token"],
-): Promise<ApiSuccess<VerifyLoginResponse> | ApiError<VerifyLoginResponse>> => {
-  const url = formatUrl(BASE_URL, ENDPOINT.verifyLoginPin, account);
+): Promise<
+  ApiSuccess<TwoFactorApiResponse> | ApiError<TwoFactorApiResponse>
+> => {
+  const session = await buildIronSession();
+  if (session.state !== "TWO_FACTOR" || !session.account || !session.token) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+    };
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.verifyLoginPin, session.account);
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "TOKEN-AUTH": token,
+      "TOKEN-AUTH": session.token,
     },
     body: JSON.stringify({ pin }),
   }).catch(() => null);
@@ -74,33 +103,39 @@ export const verifyLoginPin = async (
     return {
       status: "error",
       message: json?.message ?? "Unknown error",
-      data: json,
     };
   }
 
+  session.state = "LOGGED_IN";
+  await session.save();
+
   return {
     status: "ok",
-    data: json as VerifyLoginResponse,
   };
 };
 
 /**
  * Resend the 2FA login pin
  *
- * @param account Current account
- * @param token API token
- * @returns {Promise<VerifyLoginResponse>}
+ * @returns {Promise<TwoFactorApiResponse>}
  */
-export const resendLoginPin = async (
-  account: Account,
-  token: LoginAuth["token"],
-): Promise<ApiSuccess<VerifyLoginResponse> | ApiError<VerifyLoginResponse>> => {
-  const url = formatUrl(BASE_URL, ENDPOINT.resendLoginPin, account);
+export const resendLoginPin = async (): Promise<
+  ApiSuccess<TwoFactorApiResponse> | ApiError<TwoFactorApiResponse>
+> => {
+  const session = await buildIronSession();
+  if (session.state !== "TWO_FACTOR" || !session.account || !session.token) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+    };
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.resendLoginPin, session.account);
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "TOKEN-AUTH": token,
+      "TOKEN-AUTH": session.token,
     },
   }).catch(() => null);
 
@@ -110,33 +145,41 @@ export const resendLoginPin = async (
     return {
       status: "error",
       message: json?.message ?? "Unknown error",
-      data: json,
     };
   }
 
   return {
     status: "ok",
-    data: json as VerifyLoginResponse,
   };
 };
 
 /**
  * Perform an API logout request
  *
- * @param account The current account
- * @param token The session API token
- * @returns {Promise<LogoutResponse>}
+ * @returns {Promise<LogoutApiResponse>}
  */
-export const logout = async (
-  account: Account,
-  token: LoginAuth["token"],
-): Promise<ApiSuccess<LogoutResponse> | ApiError<LogoutResponse>> => {
-  const url = formatUrl(BASE_URL, ENDPOINT.logout, account);
+export const logout = async (): Promise<
+  ApiSuccess<LogoutApiResponse> | ApiError<LogoutApiResponse>
+> => {
+  const session = await buildIronSession();
+  if (session.state !== "TWO_FACTOR" || !session.account || !session.token) {
+    const oldId = session.client_id;
+    await session.destroy();
+    session.client_id = oldId;
+    session.state = "LOGGED_OUT";
+    await session.save();
+
+    return {
+      status: "ok",
+    };
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.logout, session.account);
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "TOKEN-AUTH": token,
+      "TOKEN-AUTH": session.token,
     },
   }).catch(() => null);
 
@@ -146,12 +189,41 @@ export const logout = async (
     return {
       status: "error",
       message: json?.message ?? "Unknown error",
-      data: json,
+    };
+  }
+
+  const oldId = session.client_id;
+  await session.destroy();
+  session.client_id = oldId;
+  session.state = "LOGGED_OUT";
+  await session.save();
+
+  return {
+    status: "ok",
+  };
+};
+
+/**
+ * Get the account information for the current session
+ *
+ * @returns {Promise<GetAccountApiResponse>}
+ */
+export const getAccount = async (): Promise<
+  ApiSuccess<GetAccountApiResponse> | ApiError<GetAccountApiResponse>
+> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+      account: null,
+      state: session.state,
     };
   }
 
   return {
     status: "ok",
-    data: json as LogoutResponse,
+    account: session.account,
+    state: session.state,
   };
 };

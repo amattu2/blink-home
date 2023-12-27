@@ -3,10 +3,7 @@
 import { Button, Form, Input, Layout, notification } from "antd";
 import { FC } from "react";
 import { useRouter } from "next/navigation";
-import { useLocalStorage } from "usehooks-ts";
-import { v4 as uuidv4 } from "uuid";
 import { login } from "@/api/actions";
-import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import lang from "@/lang/en";
 
 type FormFields = {
@@ -18,29 +15,12 @@ const Login: FC = () => {
   const router = useRouter();
 
   const [api, contextHolder] = notification.useNotification();
-  const [uniqueId, setUniqueId] = useLocalStorage<string>("unique_Id", "");
-  const [, setAccount] = useLocalStorage<Account>(
-    STORAGE_KEYS.USER_ACCOUNT,
-    {} as Account,
-  );
-  const [, setToken] = useLocalStorage<LoginAuth["token"]>(
-    STORAGE_KEYS.USER_TOKEN,
-    "",
-  );
 
   const onFinish = async ({ email, password }: FormFields) => {
-    const newUniqueId = uuidv4();
-    if (!uniqueId) {
-      setUniqueId(newUniqueId);
-    }
-
     const loginExtras: Partial<LoginBody> = {
-      unique_Id: uniqueId || newUniqueId,
       client_type: "android",
-      client_name: "TODO: pull from env",
       device_identifier: window.navigator.userAgent?.split(" ")?.[0],
       os_version: "v1.0.0",
-      reauth: !!uniqueId,
     };
 
     const r = await login(email, password, loginExtras);
@@ -49,9 +29,7 @@ const Login: FC = () => {
       return;
     }
 
-    setAccount(r.data.account);
-    setToken(r.data.auth.token);
-    if (r.data?.account?.client_verification_required) {
+    if (r.two_factor_auth) {
       router.push("/2fa");
     } else {
       router.push("/dashboard");
