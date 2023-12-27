@@ -9,6 +9,15 @@ export type AuthHocProps = {
   account: Account;
 };
 
+/**
+ * Hydrates the wrapped component with the account object.
+ * and redirects to the appropriate page if the user is not
+ * in the permissible state.
+ *
+ * @see AuthHocProps The props that will be passed to the wrapped component.
+ * @param WrappedComponent The component to be wrapped.
+ * @param permissible The permissible states.
+ */
 const withAuth = (
   WrappedComponent: FC<AuthHocProps>,
   permissible: AuthState[],

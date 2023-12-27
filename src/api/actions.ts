@@ -39,7 +39,7 @@ export const login = async (
       password,
       ...extras,
       unique_Id: session.client_id,
-      client_name: "blink-test", // TODO: Move to env
+      client_name: process.env.CLIENT_NAME,
       reauth: session.reauth,
     }),
   }).catch(() => null);

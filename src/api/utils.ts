@@ -28,9 +28,16 @@ export const formatUrl = (
  * @returns The iron session for the app
  */
 export const buildIronSession = async (): Promise<IronSession<AuthSession>> => {
+  if (!process.env.SESSION_PASSWORD) {
+    throw new Error("Missing SESSION_PASSWORD environment variable");
+  }
+  if (!process.env.SESSION_COOKIE_NAME) {
+    throw new Error("Missing SESSION_COOKIE_NAME environment variable");
+  }
+
   const session = await getIronSession<AuthSession>(cookies(), {
-    password: "mArm!HLgP<5Qz./e{:$3''q$3sf[YYM$", // TODO: Move to env
-    cookieName: "blink-test", // TODO: Move to env
+    password: process.env.SESSION_PASSWORD,
+    cookieName: process.env.SESSION_COOKIE_NAME,
   });
 
   if (!session.state) {

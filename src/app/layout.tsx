@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CSSProperties, FC } from "react";
 
 export const metadata: Metadata = {
-  title: "Blink Home",
+  title: process.env.APP_NAME,
   description:
     "A web-based Blink Home monitoring system app built with Next.js and Antd",
 };
