@@ -227,3 +227,40 @@ export const getAccount = async (): Promise<
     state: session.state,
   };
 };
+
+export const getHomeScreen = async (): Promise<
+  ApiSuccess<GetHomeScreenApiResponse> | ApiError<GetHomeScreenApiResponse>
+> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+      data: null,
+    };
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.homescreen, session.account);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "TOKEN-AUTH": session.token,
+    },
+  }).catch(() => null);
+
+  const json = await response?.json()?.catch(() => null);
+
+  if (!response || !response.ok || !json) {
+    return {
+      status: "error",
+      message: json?.message ?? "Unknown error",
+      data: null,
+    };
+  }
+
+  return {
+    status: "ok",
+    data: json,
+  };
+};

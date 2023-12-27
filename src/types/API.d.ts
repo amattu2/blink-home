@@ -1,3 +1,13 @@
+type AuthState = "LOGGED_IN" | "LOGGED_OUT" | "TWO_FACTOR";
+
+type AuthSession = {
+  state: AuthState;
+  client_id: string;
+  reauth: boolean;
+  account: Account | null;
+  token: string | null;
+};
+
 type BaseResponse = {
   status: "ok" | "error";
 };
@@ -26,4 +36,8 @@ type LogoutApiResponse = {
 type GetAccountApiResponse = {
   account: Account | null;
   state: AuthState;
+};
+
+type GetHomeScreenApiResponse = {
+  data: Homescreen | null;
 };
