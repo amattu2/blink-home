@@ -15,7 +15,7 @@ export const login = async (
   email: string,
   password: string,
   extras: Omit<
-    LoginBody,
+    LoginApiBody,
     "email" | "password" | "unique_Id" | "client_name" | "reauth"
   >,
 ): Promise<ApiSuccess<LoginApiResponse> | ApiError<LoginApiResponse>> => {
@@ -212,7 +212,7 @@ export const getAccount = async (): Promise<
   ApiSuccess<GetAccountApiResponse> | ApiError<GetAccountApiResponse>
 > => {
   const session = await buildIronSession();
-  if (session.state !== "LOGGED_IN" || !session.account) {
+  if (session.state === "LOGGED_OUT" || !session.account) {
     return {
       status: "error",
       message: `Incorrect login state: ${session.state}`,
@@ -228,6 +228,12 @@ export const getAccount = async (): Promise<
   };
 };
 
+/**
+ * Get the Homescreen details for the current session
+ *
+ * @see Homescreen
+ * @returns {Promise<GetHomeScreenApiResponse>}
+ */
 export const getHomeScreen = async (): Promise<
   ApiSuccess<GetHomeScreenApiResponse> | ApiError<GetHomeScreenApiResponse>
 > => {
@@ -262,5 +268,98 @@ export const getHomeScreen = async (): Promise<
   return {
     status: "ok",
     data: json,
+  };
+};
+
+/**
+ * Gets the list of supported countries for registration
+ *
+ * @returns {Promise<GetCountriesApiResponse>}
+ */
+export const getCountries = async (): Promise<
+  ApiSuccess<GetCountriesApiResponse> | ApiError<GetCountriesApiResponse>
+> => {
+  const url = formatUrl(BASE_URL, ENDPOINT.countries);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).catch(() => null);
+
+  const json = await response?.json()?.catch(() => null);
+
+  if (!response || !response.ok || !json?.countries?.length) {
+    return {
+      status: "error",
+      message: json?.message ?? "Unknown error",
+      countries: [],
+    };
+  }
+
+  return {
+    status: "ok",
+    countries: json?.countries,
+  };
+};
+
+export const register = async (
+  email: string,
+  password: string,
+  password_confirm: string,
+  country: string,
+  extras: Pick<
+    RegisterApiBody,
+    "client_type" | "device_identifier" | "os_version"
+  >,
+): Promise<ApiSuccess<RegisterApiResponse> | ApiError<RegisterApiResponse>> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_OUT") {
+    return {
+      status: "error",
+      message: "Already logged in",
+      two_factor_auth: session.state === "TWO_FACTOR",
+    };
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.register);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      password_confirm,
+      country,
+      ...extras,
+      unique_Id: session.client_id,
+      client_name: process.env.CLIENT_NAME,
+      reauth: session.reauth,
+    }),
+  }).catch(() => null);
+
+  const json = await response?.json()?.catch(() => null);
+
+  if (!response || !response.ok || !json || !json?.account?.account_id) {
+    return {
+      status: "error",
+      message: json?.message ?? "Unknown error",
+      two_factor_auth: false,
+    };
+  }
+
+  session.state = json?.account?.client_verification_required
+    ? "TWO_FACTOR"
+    : "LOGGED_IN";
+  session.account = json?.account;
+  session.reauth = true;
+  session.token = json?.auth?.token;
+  await session.save();
+
+  return {
+    status: "ok",
+    two_factor_auth: json?.account?.client_verification_required,
   };
 };

@@ -17,7 +17,7 @@ const Login: FC = () => {
   const [api, contextHolder] = notification.useNotification();
 
   const onFinish = async ({ email, password }: FormFields) => {
-    const loginExtras: Partial<LoginBody> = {
+    const loginExtras: Partial<LoginApiBody> = {
       client_type: "android",
       device_identifier: window.navigator.userAgent?.split(" ")?.[0],
       os_version: "v1.0.0",

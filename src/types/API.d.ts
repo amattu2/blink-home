@@ -21,7 +21,28 @@ type ApiError<T> = BaseResponse & {
   message: string;
 } & T;
 
+type LoginApiBody = {
+  email: string;
+  password: string;
+  unique_Id?: string;
+  client_type?: "amazon" | "android";
+  client_name?: string;
+  device_identifier?: string;
+  os_version?: string;
+  reauth?: boolean;
+};
+
+type RegisterApiBody = {
+  password_confirm: string;
+  country: string;
+} & LoginApiBody;
+
 type LoginApiResponse = {
+  two_factor_auth: boolean;
+};
+
+type RegisterApiResponse = {
+  // TODO: more?
   two_factor_auth: boolean;
 };
 
@@ -40,4 +61,8 @@ type GetAccountApiResponse = {
 
 type GetHomeScreenApiResponse = {
   data: Homescreen | null;
+};
+
+type GetCountriesApiResponse = {
+  countries: string[];
 };
