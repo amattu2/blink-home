@@ -363,3 +363,38 @@ export const register = async (
     two_factor_auth: json?.account?.client_verification_required,
   };
 };
+
+/**
+ * Downloads the thumbnail image from the given url and returns it as a base64 string
+ *
+ * @param url The url to download the image from
+ * @returns {Promise<string | null>}
+ */
+export const getThumbnailImage = async (
+  url: string,
+): Promise<string | null> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return null;
+  }
+
+  const response = await fetch(formatUrl(BASE_URL, url, session.account), {
+    method: "GET",
+    headers: {
+      "TOKEN-AUTH": session.token,
+      "Content-Type": "image/jpeg",
+    },
+  }).catch(() => null);
+
+  const buffer = await response?.arrayBuffer()?.catch(() => null);
+  if (!response || !response.ok || !buffer) {
+    return null;
+  }
+
+  const base64 = Buffer.from(buffer).toString("base64");
+  if (!base64) {
+    return null;
+  }
+
+  return `data:image/jpeg;base64,${base64}`;
+};
