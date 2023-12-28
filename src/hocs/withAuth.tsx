@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import { getAccount } from "@/api/actions";
 import { getRedirectPath } from "@/utils/auth";
+import { Spin } from "antd";
 
 export type AuthHocProps = {
   account: Account;
@@ -42,7 +43,7 @@ const withAuth = (
     }, []);
 
     return loading || !account ? (
-      <p>Loading...</p>
+      <Spin fullscreen spinning />
     ) : (
       <WrappedComponent {...props} account={account} />
     );

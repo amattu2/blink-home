@@ -1,13 +1,13 @@
 import { getThumbnailImage } from "@/api/actions";
 import { FC, useEffect, useState } from "react";
-import Image from "next/image";
+import { Image, Skeleton } from "antd";
 
 type Props = {
   src: string;
   alt: string;
   width: number;
   height: number;
-} & React.ImgHTMLAttributes<HTMLImageElement>;
+};
 
 /**
  * Renders a thumbnail for a Blink device
@@ -27,7 +27,12 @@ const Thumbnail: FC<Props> = ({ src, alt, ...props }) => {
   }, [src]);
 
   if (!image || !src) {
-    return null;
+    return (
+      <Skeleton.Image
+        active
+        style={{ width: props.width, height: props.height }}
+      />
+    );
   }
 
   return <Image src={image} alt={alt} {...props} />;
