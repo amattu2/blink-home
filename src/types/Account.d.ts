@@ -28,9 +28,6 @@ type AccountUser = {
 type AccountPhone = {
   country_calling_code: string;
   last_4_digits: string;
-  /**
-   * @example "+1******0000"
-   */
   number: string;
   valid: boolean;
 };
