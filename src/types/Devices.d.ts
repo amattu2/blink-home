@@ -12,17 +12,19 @@ type BaseDevice<T> = {
   onboarded: boolean;
   revision: string;
   status: "done" | "online";
-  type:
-    | "camera"
-    | "doorbell"
-    | "chime"
-    | "doorbell_button"
-    | "owl"
-    | "sm"
-    | "sm2"
-    | "siren";
+  type: DeviceType;
   updated_at: string;
 } & T;
+
+type DeviceType =
+  | "camera"
+  | "doorbell"
+  | "chime"
+  | "doorbell_button"
+  | "owl"
+  | "sm"
+  | "sm2"
+  | "siren";
 
 /**
  * Defines a base model for all Blink Vision devices.

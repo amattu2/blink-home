@@ -10,4 +10,5 @@ export const ENDPOINT = {
   logout: "api/v4/account/{{account_id}}/client/{{client_id}}/logout",
   homescreen: "api/v4/accounts/{{account_id}}/homescreen",
   countries: "api/v1/countries",
+  media_changed: "api/v2/accounts/{{account_id}}/media/changed",
 };

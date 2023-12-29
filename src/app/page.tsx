@@ -1,5 +1,3 @@
-"use client";
+import page from "@/app/dashboard/page";
 
-export default function Home() {
-  return <main>home</main>;
-}
+export default page;

@@ -66,3 +66,7 @@ type GetHomeScreenApiResponse = {
 type GetCountriesApiResponse = {
   countries: string[];
 };
+
+type GetMediaApiResponse = {
+  media: MediaEvent[];
+};

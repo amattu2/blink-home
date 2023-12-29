@@ -1,0 +1,24 @@
+type MediaEvent = {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  deleted: boolean;
+  device: DeviceType;
+  device_id: number;
+  device_name: string;
+  network_id: number;
+  network_name: string;
+  type: "video";
+  source: "snapshot" | "pir" | "button_press" | "liveview";
+  watched: boolean;
+  partial: boolean;
+  thumbnail: string;
+  media: string;
+  event_type: null;
+  cv_detection: null;
+  no_media_reason: null;
+  metadata: null;
+  addition_devices: Array<unknown>;
+  time_zone: string;
+  clip_length: null;
+};

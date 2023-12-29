@@ -196,6 +196,7 @@ export const logout = async (): Promise<
   await session.destroy();
   session.client_id = oldId;
   session.state = "LOGGED_OUT";
+  session.reauth = false;
   await session.save();
 
   return {
@@ -220,6 +221,9 @@ export const getAccount = async (): Promise<
       state: session.state,
     };
   }
+
+  // TODO: This function needs to fetch the account information from the API
+  // and try to reauthenticate if the token is invalid
 
   return {
     status: "ok",
@@ -397,4 +401,54 @@ export const getThumbnailImage = async (
   }
 
   return `data:image/jpeg;base64,${base64}`;
+};
+
+/**
+ * Gets the list of media events across all networks since the given date
+ *
+ * @param since YYYY-MM-DD
+ * @param page The page number to fetch
+ * @returns {Promise<GetMediaApiResponse>}
+ */
+export const getChangedMedia = async (
+  since: string,
+  page: number,
+): Promise<ApiSuccess<GetMediaApiResponse> | ApiError<GetMediaApiResponse>> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+      media: [],
+    };
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.media_changed, session.account);
+  const params = new URLSearchParams({
+    since,
+    page: page.toString(),
+  });
+
+  const response = await fetch(`${url}?${params}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "TOKEN-AUTH": session.token,
+    },
+  }).catch(() => null);
+
+  const json = await response?.json()?.catch(() => null);
+
+  if (!response || !response.ok || !json?.media?.length) {
+    return {
+      status: "error",
+      message: json?.message ?? "Unknown error",
+      media: [],
+    };
+  }
+
+  return {
+    status: "ok",
+    media: json?.media,
+  };
 };
