@@ -20,13 +20,11 @@ const Dashboard: FC<AuthHocProps> = () => {
   );
 
   useEffect(() => {
-    if (homescreen) {
-      return;
-    }
-
     (async () => {
       const d = await getHomeScreen();
-      if (d.status === "ok") setHomescreen(d.data);
+      if (d.status === "ok") {
+        setHomescreen(d.data);
+      }
     })();
   }, []);
 
@@ -50,33 +48,36 @@ const Dashboard: FC<AuthHocProps> = () => {
             <Statistics home={homescreen} />
           </Section>
           <Section>
-            <Card>
-              {homescreen?.networks.map((network, index) => (
-                <div key={network.id}>
-                  <NetworkDetails network={network} />
-                  <List
-                    grid={{ gutter: 16, lg: 2, md: 1, sm: 1, xs: 1 }}
-                    dataSource={aggregateVisionDevices(network.id, homescreen)}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <VisionDeviceCard device={item} />
-                      </List.Item>
-                    )}
-                  />
-                  <Row gutter={[16, 16]}>
-                    {homescreen.sync_modules
-                      .filter((m) => m.network_id === network.id)
-                      .map((module) => (
-                        <Col key={module.id}>
-                          <p>Module {module.serial}</p>
-                          <p>{module.status}</p>
-                        </Col>
-                      ))}
-                  </Row>
-                  {index !== homescreen.networks.length - 1 && <hr />}
-                </div>
-              ))}
-            </Card>
+            {homescreen?.networks.map((network, index) => (
+              <Card
+                key={network.id}
+                style={{
+                  marginBottom:
+                    index !== homescreen.networks.length - 1 ? 16 : 0,
+                }}
+              >
+                <NetworkDetails network={network} />
+                <List
+                  grid={{ gutter: 16, lg: 2, md: 1, sm: 1, xs: 1 }}
+                  dataSource={aggregateVisionDevices(network.id, homescreen)}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <VisionDeviceCard device={item} />
+                    </List.Item>
+                  )}
+                />
+                <Row gutter={[16, 16]}>
+                  {homescreen.sync_modules
+                    .filter((m) => m.network_id === network.id)
+                    .map((module) => (
+                      <Col key={module.id}>
+                        <p>Module {module.serial}</p>
+                        <p>{module.status}</p>
+                      </Col>
+                    ))}
+                </Row>
+              </Card>
+            ))}
           </Section>
         </Col>
         <Col span={8}>
