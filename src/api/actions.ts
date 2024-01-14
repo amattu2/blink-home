@@ -164,7 +164,7 @@ export const logout = async (): Promise<
   const session = await buildIronSession();
   if (session.state !== "TWO_FACTOR" || !session.account || !session.token) {
     const oldId = session.client_id;
-    await session.destroy();
+    session.destroy();
     session.client_id = oldId;
     session.state = "LOGGED_OUT";
     await session.save();
@@ -193,7 +193,7 @@ export const logout = async (): Promise<
   }
 
   const oldId = session.client_id;
-  await session.destroy();
+  session.destroy();
   session.client_id = oldId;
   session.state = "LOGGED_OUT";
   session.reauth = false;
