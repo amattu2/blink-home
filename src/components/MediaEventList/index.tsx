@@ -92,9 +92,12 @@ const MediaEventList: FC<Props> = ({ since = getDateNDaysAgo(7) }) => {
     (async () => {
       const d = await getChangedMedia(sinceDate, 1);
       if (d.status === "ok") {
-        setData(d.media);
-        setPaginatedData(d.media.slice(0, PAGINATION_SIZE));
-        setHasMore(d.media.length > PAGINATION_SIZE);
+        const cloned = [...d.media];
+        cloned.sort((a, b) => b.id - a.id);
+
+        setData(cloned);
+        setPaginatedData(cloned.slice(0, PAGINATION_SIZE));
+        setHasMore(cloned.length > PAGINATION_SIZE);
       }
       setLoading(false);
     })();
