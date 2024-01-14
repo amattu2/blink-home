@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Divider, List, Tag } from "antd";
+import { Badge, Divider, List, Tag } from "antd";
 import { getChangedMedia } from "@/api/actions";
 import {
   formatYYYYMMDD,
@@ -27,7 +27,13 @@ const ListItem: FC<{ event: MediaEvent }> = ({ event }) => {
   return (
     <List.Item key={event.id}>
       <List.Item.Meta
-        title={event.device_name}
+        title={
+          event.watched ? (
+            event.device_name
+          ) : (
+            <Badge dot>{event.device_name}</Badge>
+          )
+        }
         description={
           <>
             <p>{`Recorded at ${event.created_at}`}</p>
