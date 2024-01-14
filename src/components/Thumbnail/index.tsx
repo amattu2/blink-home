@@ -1,13 +1,13 @@
 import { getThumbnailImage } from "@/api/actions";
 import { FC, useEffect, useState } from "react";
-import { Image, Skeleton } from "antd";
+import { Image, ImageProps, Skeleton } from "antd";
 
 type Props = {
   src: string;
   alt: string;
   width: number;
   height: number;
-};
+} & ImageProps;
 
 /**
  * Renders a thumbnail for a Blink device
