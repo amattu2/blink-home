@@ -404,6 +404,40 @@ export const getThumbnailImage = async (
 };
 
 /**
+ * Downloads the media mp4 video from the given url and returns it as a base64 string
+ *
+ * @todo This is a temporary solution until we can return an ArrayBuffer from a Server action
+ * @param url The partial url to the video file
+ * @returns {Promise<string | null>}
+ */
+export const getMediaVideo = async (url: string): Promise<string | null> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return null;
+  }
+
+  const response = await fetch(formatUrl(BASE_URL, url, session.account), {
+    method: "GET",
+    headers: {
+      "TOKEN-AUTH": session.token,
+      "Content-Type": "video/mp4",
+    },
+  }).catch(() => null);
+
+  const buffer = await response?.arrayBuffer()?.catch(() => null);
+  if (!response || !response.ok || !buffer) {
+    return null;
+  }
+
+  const base64 = Buffer.from(buffer).toString("base64");
+  if (!base64) {
+    return null;
+  }
+
+  return `data:video/mp4;base64,${base64}`;
+};
+
+/**
  * Gets the list of media events across all networks since the given date
  *
  * @param since YYYY-MM-DD

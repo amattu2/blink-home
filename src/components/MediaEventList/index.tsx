@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Divider, List, Tag } from "antd";
 import { getChangedMedia } from "@/api/actions";
@@ -10,6 +10,7 @@ import {
 import { useLocalStorage } from "usehooks-ts";
 import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import Thumbnail from "../Thumbnail";
+import MediaVideo from "../MediaVideo";
 
 type Props = {
   since?: Date;
@@ -17,21 +18,37 @@ type Props = {
 
 const PAGINATION_SIZE = 5;
 
-const ListItem: FC<{ event: MediaEvent }> = ({ event }) => (
-  <List.Item key={event.id}>
-    <List.Item.Meta
-      title={event.device_name}
-      description={
-        <>
-          <p>{`Recorded at ${event.created_at}`}</p>
-          <Tag>{event.network_name}</Tag>
-          <Tag>{getEventSource(event.source)}</Tag>
-        </>
-      }
-    />
-    <Thumbnail src={event.thumbnail} width={200} height={112} alt="Thumbnail" />
-  </List.Item>
-);
+const ListItem: FC<{ event: MediaEvent }> = ({ event }) => {
+  const player = useMemo(
+    () => <MediaVideo src={event.media} width={864} height={486} alt="Video" />,
+    [event.media],
+  );
+
+  return (
+    <List.Item key={event.id}>
+      <List.Item.Meta
+        title={event.device_name}
+        description={
+          <>
+            <p>{`Recorded at ${event.created_at}`}</p>
+            <Tag>{event.network_name}</Tag>
+            <Tag>{getEventSource(event.source)}</Tag>
+          </>
+        }
+      />
+      <Thumbnail
+        src={event.thumbnail}
+        width={224}
+        height={126}
+        alt="Thumbnail"
+        preview={{
+          imageRender: () => player,
+          toolbarRender: () => null,
+        }}
+      />
+    </List.Item>
+  );
+};
 
 /**
  * Basic list of media events (i.e. Clips)
