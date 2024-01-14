@@ -9,7 +9,7 @@ type MediaEvent = {
   network_id: number;
   network_name: string;
   type: "video";
-  source: "snapshot" | "pir" | "button_press" | "liveview";
+  source: "snapshot" | "pir" | "button_press" | "liveview" | "cv_motion";
   watched: boolean;
   partial: boolean;
   thumbnail: string;

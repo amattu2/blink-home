@@ -88,6 +88,8 @@ export const getEventSource = (source: MediaEvent["source"]): string => {
       return "Doorbell";
     case "snapshot":
       return "Snapshot";
+    case "cv_motion":
+      return "Person Detected";
     default:
       return source || "Unknown";
   }
