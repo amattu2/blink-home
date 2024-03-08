@@ -1,13 +1,24 @@
 "use client";
 
 import { getHomeScreen } from "@/api/actions";
-import VisionDeviceCard from "@/components/VisionDeviceCard";
+import VisionDeviceCard, {
+  VisionCardMethods,
+} from "@/components/VisionDeviceCard";
 import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import withAuth, { AuthHocProps } from "@/hocs/withAuth";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { aggregateVisionDevices } from "@/utils/dashboard";
-import { Layout, Breadcrumb, Row, Col, List, Typography, Card } from "antd";
+import {
+  Layout,
+  Breadcrumb,
+  Row,
+  Col,
+  List,
+  Typography,
+  Card,
+  Button,
+} from "antd";
 import NetworkDetails from "@/components/NetworkDetails";
 import Statistics from "@/components/Statistics";
 import Section from "@/components/Section";
@@ -18,6 +29,12 @@ const Dashboard: FC<AuthHocProps> = () => {
     STORAGE_KEYS.homescreen,
     null,
   );
+  const thumbnailRefs = useRef<Array<VisionCardMethods>>([]);
+
+  const refreshThumbnails = () => {
+    // TODO: await refreshThumbnail for each device
+    // thumbnailRefs?.current.forEach((ref) => ref?.refreshThumbnail());
+  };
 
   useEffect(() => {
     (async () => {
@@ -57,12 +74,21 @@ const Dashboard: FC<AuthHocProps> = () => {
                 }}
               >
                 <NetworkDetails network={network} />
+                {/* TODO: move to sidepanel, this is for testing */}
+                <Button onClick={refreshThumbnails}>
+                  Refresh All Thumbnails
+                </Button>
                 <List
                   grid={{ gutter: 16, lg: 2, md: 1, sm: 1, xs: 1 }}
                   dataSource={aggregateVisionDevices(network.id, homescreen)}
-                  renderItem={(item) => (
+                  renderItem={(item, idx) => (
                     <List.Item>
-                      <VisionDeviceCard device={item} />
+                      <VisionDeviceCard
+                        device={item}
+                        ref={(e: VisionCardMethods) => {
+                          thumbnailRefs.current[idx] = e;
+                        }}
+                      />
                     </List.Item>
                   )}
                 />

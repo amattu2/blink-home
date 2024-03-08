@@ -11,4 +11,10 @@ export const ENDPOINT = {
   homescreen: "api/v4/accounts/{{account_id}}/homescreen",
   countries: "api/v1/countries",
   media_changed: "api/v2/accounts/{{account_id}}/media/changed",
+  refresh_lotus_thumbnail:
+    "api/v1/accounts/{{account_id}}/networks/{{network_id}}/doorbells/{{device_id}}/thumbnail",
+  refresh_owl_thumbnail:
+    "api/v1/accounts/{{account_id}}/networks/{{network_id}}/owls/{{device_id}}/thumbnail",
+  refresh_superior_thumbnail:
+    "api/v1/accounts/{{account_id}}/networks/{{network_id}}/superiors/{{device_id}}/thumbnail",
 };

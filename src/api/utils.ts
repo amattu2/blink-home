@@ -1,25 +1,34 @@
 import { IronSession, getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
+import { ENDPOINT } from "./constants";
 
 /**
  * Formats a template url with the account information
  *
  * @param url The url to format
- * @param account The account information
+ * @param extras The account information
  * @returns formatted url
  */
 export const formatUrl = (
   base: string,
   path: string,
-  account?: Account,
+  extras?: Record<string, string | number | boolean>,
 ): string => {
-  const { account_id, client_id } = account || {};
+  const { account_id, client_id, tier } = extras || {};
 
-  return `${base}${path}`
-    .replace("{{tier}}", account?.tier || "prod")
+  let url = `${base}${path}`
+    .replace("{{tier}}", tier?.toString() || "prod")
     .replace("{{account_id}}", account_id?.toString() || "")
     .replace("{{client_id}}", client_id?.toString() || "");
+
+  Object.keys(extras || {}).forEach((key) => {
+    if (url.includes(`{{${key}}}`) && extras?.[key] !== undefined) {
+      url = url.replace(`{{${key}}}`, extras[key].toString());
+    }
+  });
+
+  return url;
 };
 
 /**
@@ -50,4 +59,19 @@ export const buildIronSession = async (): Promise<IronSession<AuthSession>> => {
 
   await session.save();
   return session;
+};
+
+export const getRefreshThumbnailUrl = (
+  device_type: VisionDeviceType,
+): string => {
+  switch (device_type) {
+    case "lotus":
+      return ENDPOINT.refresh_lotus_thumbnail;
+    case "owl":
+      return ENDPOINT.refresh_owl_thumbnail;
+    case "superior":
+      return ENDPOINT.refresh_superior_thumbnail;
+    default:
+      throw new Error(`Device type ${device_type} not supported`);
+  }
 };

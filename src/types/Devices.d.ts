@@ -1,3 +1,21 @@
+type DeviceType =
+  | "camera"
+  | "doorbell"
+  | "chime"
+  | "doorbell_button"
+  | "sm"
+  | "sm2"
+  | "siren";
+
+/**
+ * Blink devices that are vision-based
+ *
+ * Lotus: Doorbell
+ * Owl: Indoor Camera
+ * Superior: Floodlight
+ */
+type VisionDeviceType = "lotus" | "owl" | "superior";
+
 /**
  * Defines a base model for all Blink devices.
  */
@@ -16,16 +34,6 @@ type BaseDevice<T> = {
   updated_at: string;
 } & T;
 
-type DeviceType =
-  | "camera"
-  | "doorbell"
-  | "chime"
-  | "doorbell_button"
-  | "owl"
-  | "sm"
-  | "sm2"
-  | "siren";
-
 /**
  * Defines a base model for all Blink Vision devices.
  *
@@ -33,6 +41,7 @@ type DeviceType =
  */
 type BaseVisionDevice<T> = {
   thumbnail: string;
+  type: VisionDeviceType;
 } & BaseDevice<T>;
 
 type Doorbell = BaseVisionDevice<{

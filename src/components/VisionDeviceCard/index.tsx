@@ -1,12 +1,17 @@
-import { FC } from "react";
+import React, { FC, useImperativeHandle } from "react";
 import { Card, Popconfirm, Tag } from "antd";
 import { EditOutlined, CloudSyncOutlined } from "@ant-design/icons";
 import Thumbnail from "@/components/Thumbnail";
+import { updateThumbnailImage } from "@/api/actions";
 
 const { Meta } = Card;
 
 type Props<T extends BaseVisionDevice<unknown>> = {
   device: T;
+};
+
+export type VisionCardMethods = {
+  refreshThumbnail: () => void;
 };
 
 /**
@@ -15,12 +20,19 @@ type Props<T extends BaseVisionDevice<unknown>> = {
  * @param {Props<BaseVisionDevice<unknown>>} { device }
  * @returns {React.FC}
  */
-const VisionDeviceCard: FC<Props<BaseVisionDevice<unknown>>> = ({ device }) => {
-  const { name, thumbnail, updated_at, type, id } = device;
+const VisionDeviceCard = (
+  { device }: Props<BaseVisionDevice<unknown>>,
+  ref: React.Ref<VisionCardMethods>,
+) => {
+  const { name, thumbnail, updated_at, type, id, network_id } = device;
 
   const refreshThumbnail = async () => {
-    // TODO: Implement this
+    const response = await updateThumbnailImage(network_id, id, type);
+    // TODO: watch the command status and refresh the thumbnail
+    console.log(response);
   };
+
+  useImperativeHandle(ref, () => ({ refreshThumbnail }), [id]);
 
   return (
     <Card
@@ -54,4 +66,6 @@ const VisionDeviceCard: FC<Props<BaseVisionDevice<unknown>>> = ({ device }) => {
   );
 };
 
-export default VisionDeviceCard;
+export default React.forwardRef(VisionDeviceCard) as FC<
+  Props<BaseVisionDevice<unknown>> & { ref?: React.Ref<VisionCardMethods> }
+>;

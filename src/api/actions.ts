@@ -1,7 +1,7 @@
 "use server";
 
 import { BASE_URL, ENDPOINT } from "./constants";
-import { buildIronSession, formatUrl } from "./utils";
+import { buildIronSession, formatUrl, getRefreshThumbnailUrl } from "./utils";
 
 /**
  * Perform a login request
@@ -87,7 +87,11 @@ export const verifyLoginPin = async (
     };
   }
 
-  const url = formatUrl(BASE_URL, ENDPOINT.verifyLoginPin, session.account);
+  const url = formatUrl(BASE_URL, ENDPOINT.verifyLoginPin, {
+    client_id: session.account.client_id,
+    account_id: session.account.account_id,
+    tier: session?.account?.tier,
+  });
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -130,7 +134,11 @@ export const resendLoginPin = async (): Promise<
     };
   }
 
-  const url = formatUrl(BASE_URL, ENDPOINT.resendLoginPin, session.account);
+  const url = formatUrl(BASE_URL, ENDPOINT.resendLoginPin, {
+    client_id: session.account.client_id,
+    account_id: session.account.account_id,
+    tier: session?.account?.tier,
+  });
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -174,7 +182,11 @@ export const logout = async (): Promise<
     };
   }
 
-  const url = formatUrl(BASE_URL, ENDPOINT.logout, session.account);
+  const url = formatUrl(BASE_URL, ENDPOINT.logout, {
+    client_id: session.account.client_id,
+    account_id: session.account.account_id,
+    tier: session?.account?.tier,
+  });
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -250,7 +262,10 @@ export const getHomeScreen = async (): Promise<
     };
   }
 
-  const url = formatUrl(BASE_URL, ENDPOINT.homescreen, session.account);
+  const url = formatUrl(BASE_URL, ENDPOINT.homescreen, {
+    account_id: session.account.account_id,
+    tier: session?.account?.tier,
+  });
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -382,7 +397,8 @@ export const getThumbnailImage = async (
     return null;
   }
 
-  const response = await fetch(formatUrl(BASE_URL, url, session.account), {
+  const apiUrl = formatUrl(BASE_URL, url, { tier: session?.account?.tier });
+  const response = await fetch(apiUrl, {
     method: "GET",
     headers: {
       "TOKEN-AUTH": session.token,
@@ -404,6 +420,55 @@ export const getThumbnailImage = async (
 };
 
 /**
+ * Initiates the command to refresh the device thumbnail image
+ *
+ * @param network_id The network that the device is on
+ * @param device_id The device to update
+ * @param device_type The type of device to update
+ * @returns Proimse<CommandApiResponse>
+ */
+export const updateThumbnailImage = async (
+  network_id: number,
+  device_id: number,
+  device_type: VisionDeviceType,
+): Promise<ApiSuccess<CommandApiResponse> | ApiError<CommandApiResponse>> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+    };
+  }
+
+  const url = formatUrl(BASE_URL, getRefreshThumbnailUrl(device_type), {
+    account_id: session.account.account_id,
+    tier: session?.account?.tier,
+    network_id,
+    device_id,
+  });
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "TOKEN-AUTH": session.token,
+      "Content-Type": "application/json",
+    },
+  }).catch(() => null);
+
+  const json = await response?.json()?.catch(() => null);
+  if (!json?.id || json?.state !== "new") {
+    return {
+      status: "error",
+      message: json?.message ?? "Unknown error",
+    };
+  }
+
+  return {
+    status: "ok",
+    ...(json as CommandApiResponse),
+  };
+};
+
+/**
  * Downloads the media mp4 video from the given url and returns it as a base64 string
  *
  * @todo This is a temporary solution until we can return an ArrayBuffer from a Server action
@@ -416,7 +481,8 @@ export const getMediaVideo = async (url: string): Promise<string | null> => {
     return null;
   }
 
-  const response = await fetch(formatUrl(BASE_URL, url, session.account), {
+  const apiUrl = formatUrl(BASE_URL, url, { tier: session?.account?.tier });
+  const response = await fetch(apiUrl, {
     method: "GET",
     headers: {
       "TOKEN-AUTH": session.token,
@@ -457,7 +523,10 @@ export const getChangedMedia = async (
     };
   }
 
-  const url = formatUrl(BASE_URL, ENDPOINT.media_changed, session.account);
+  const url = formatUrl(BASE_URL, ENDPOINT.media_changed, {
+    account_id: session.account.account_id,
+    tier: session.account.tier,
+  });
   const params = new URLSearchParams({
     since,
     page: page.toString(),

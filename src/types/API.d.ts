@@ -19,7 +19,7 @@ type ApiSuccess<T> = BaseResponse & {
 type ApiError<T> = BaseResponse & {
   status: "error";
   message: string;
-} & T;
+} & Partial<T>;
 
 type LoginApiBody = {
   email: string;
@@ -69,4 +69,13 @@ type GetCountriesApiResponse = {
 
 type GetMediaApiResponse = {
   media: MediaEvent[];
+};
+
+type CommandApiResponse = {
+  id: number;
+  network_id: number;
+  // TODO: Add more
+  command: "thumbnail";
+  // TODO: Add more states
+  state: "new";
 };
