@@ -4,7 +4,7 @@
  * @param loginState The current login state
  * @returns The path to redirect to
  */
-export const getRedirectPath = (loginState: AuthState): string => {
+export const getRedirectPath = (loginState: AuthState | undefined): string => {
   switch (loginState) {
     case "LOGGED_IN":
       return "/dashboard";

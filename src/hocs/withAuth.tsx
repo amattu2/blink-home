@@ -32,7 +32,7 @@ const withAuth = (
     useEffect(() => {
       (async () => {
         const { state, account } = await getAccount();
-        if (!permissible.includes(state) || !state || !account) {
+        if (!state || !permissible.includes(state) || !account) {
           router.push(getRedirectPath(state));
           return;
         }

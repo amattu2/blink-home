@@ -1,11 +1,14 @@
 type DeviceType =
   | "camera"
   | "doorbell"
+  | "lotus"
   | "chime"
   | "doorbell_button"
   | "sm"
   | "sm2"
-  | "siren";
+  | "siren"
+  | "owl"
+  | "superior";
 
 /**
  * Blink devices that are vision-based
@@ -22,7 +25,7 @@ type VisionDeviceType = "lotus" | "owl" | "superior";
 type BaseDevice<T> = {
   created_at: string;
   fw_version: string;
-  id: string;
+  id: number;
   local_storage_compatibile: boolean;
   local_storage_enabled: boolean;
   name: string;
@@ -39,10 +42,10 @@ type BaseDevice<T> = {
  *
  * e.g. Doorbell, Owl, Floodlight
  */
-type BaseVisionDevice<T> = {
+type BaseVisionDevice<T> = Omit<BaseDevice<T>, "type"> & {
   thumbnail: string;
   type: VisionDeviceType;
-} & BaseDevice<T>;
+};
 
 type Doorbell = BaseVisionDevice<{
   battery: "ok";
@@ -65,7 +68,6 @@ type Owl = BaseVisionDevice<{
   serial_number: string;
   snooze: boolean;
   snooze_time_remaining: number | null;
-  thumbnail: string;
   type: "owl";
 }>;
 
