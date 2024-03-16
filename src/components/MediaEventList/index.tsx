@@ -12,8 +12,6 @@ import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import Thumbnail from "../Thumbnail";
 import MediaVideo from "../MediaVideo";
 
-export const runtime = "edge";
-
 type Props = {
   since?: Date;
 };

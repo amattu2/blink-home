@@ -6,8 +6,6 @@ import { getAccount } from "@/api/actions";
 import { getRedirectPath } from "@/utils/auth";
 import { Spin } from "antd";
 
-export const runtime = "edge";
-
 export type AuthHocProps = {
   account: Account;
 };

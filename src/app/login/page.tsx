@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { login } from "@/api/actions";
 import lang from "@/lang/en";
 
-export const runtime = "edge";
-
 type FormFields = {
   email: string;
   password: string;

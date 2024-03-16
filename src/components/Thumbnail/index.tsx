@@ -2,8 +2,6 @@ import { getThumbnailImage } from "@/api/actions";
 import { FC, useEffect, useState } from "react";
 import { Image, ImageProps, Skeleton } from "antd";
 
-export const runtime = "edge";
-
 type Props = {
   src: string;
   alt: string;

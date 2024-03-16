@@ -7,8 +7,6 @@ import { verifyLoginPin, resendLoginPin } from "@/api/actions";
 import lang from "@/lang/en";
 import withAuth from "@/hocs/withAuth";
 
-export const runtime = "edge";
-
 type FormFields = {
   pin: number;
 };

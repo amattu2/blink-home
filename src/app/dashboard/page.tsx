@@ -24,8 +24,6 @@ import Statistics from "@/components/Statistics";
 import Section from "@/components/Section";
 import MediaEventList from "@/components/MediaEventList";
 
-export const runtime = "edge";
-
 const Dashboard: FC<AuthHocProps> = () => {
   const [homescreen, setHomescreen] = useLocalStorage<Homescreen | null>(
     STORAGE_KEYS.homescreen,

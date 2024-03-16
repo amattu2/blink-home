@@ -6,8 +6,6 @@ import { updateThumbnailImage } from "@/api/actions";
 
 const { Meta } = Card;
 
-export const runtime = "edge";
-
 type Props<T extends BaseVisionDevice<unknown>> = {
   device: T;
 };

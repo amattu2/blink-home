@@ -2,8 +2,6 @@ import { getMediaVideo } from "@/api/actions";
 import { FC, VideoHTMLAttributes, useEffect, useState } from "react";
 import { Skeleton } from "antd";
 
-export const runtime = "edge";
-
 type Props = {
   src: string;
   alt: string;
