@@ -5,6 +5,8 @@ import { FC, useEffect } from "react";
 import { logout } from "@/api/actions";
 import { useRouter } from "next/navigation";
 
+export const runtime = "edge";
+
 const Logout: FC = () => {
   const router = useRouter();
 
