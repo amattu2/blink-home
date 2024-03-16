@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { CSSProperties, FC } from "react";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: process.env.APP_NAME,
   description:
