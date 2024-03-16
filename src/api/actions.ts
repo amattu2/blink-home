@@ -3,8 +3,6 @@
 import { BASE_URL, ENDPOINT } from "./constants";
 import { buildIronSession, formatUrl, getRefreshThumbnailUrl } from "./utils";
 
-export const runtime = "edge";
-
 /**
  * Perform a login request
  *
