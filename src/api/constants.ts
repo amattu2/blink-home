@@ -15,6 +15,11 @@ export const ENDPOINT = {
     "api/v1/accounts/{{account_id}}/networks/{{network_id}}/doorbells/{{device_id}}/thumbnail",
   refresh_owl_thumbnail:
     "api/v1/accounts/{{account_id}}/networks/{{network_id}}/owls/{{device_id}}/thumbnail",
-  refresh_superior_thumbnail:
-    "api/v1/accounts/{{account_id}}/networks/{{network_id}}/superiors/{{device_id}}/thumbnail",
+  command_status: "network/{{network_id}}/command/{{command_id}}",
+  lotus_thumbnail:
+    "api/v3/media/accounts/{{account_id}}/networks/{{network_id}}/lotus/{{device_id}}/thumbnail/thumbnail.jpg",
+  owl_thumbnail:
+    "api/v3/media/accounts/{{account_id}}/networks/{{network_id}}/owl/{{device_id}}/thumbnail/thumbnail.jpg",
+  superior_thumbnail:
+    "api/v3/media/accounts/{{account_id}}/networks/{{network_id}}/superior/{{device_id}}/thumbnail/thumbnail.jpg",
 };

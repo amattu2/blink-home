@@ -61,6 +61,13 @@ export const buildIronSession = async (): Promise<IronSession<AuthSession>> => {
   return session;
 };
 
+/**
+ * Maps the device type to the refresh thumbnail url
+ *
+ * @param device_type The device type
+ * @returns The refresh thumbnail url
+ * @throws If the device type is not supported
+ */
 export const getRefreshThumbnailUrl = (
   device_type: VisionDeviceType,
 ): string => {
@@ -68,9 +75,27 @@ export const getRefreshThumbnailUrl = (
     case "lotus":
       return ENDPOINT.refresh_lotus_thumbnail;
     case "owl":
-      return ENDPOINT.refresh_owl_thumbnail;
     case "superior":
-      return ENDPOINT.refresh_superior_thumbnail;
+      return ENDPOINT.refresh_owl_thumbnail;
+    default:
+      throw new Error(`Device type ${device_type} not supported`);
+  }
+};
+
+/**
+ * Maps the device type to the view thumbnail url
+ *
+ * @param device_type The device type
+ * @returns The view thumbnail url
+ */
+export const getViewThumbnailUrl = (device_type: VisionDeviceType): string => {
+  switch (device_type) {
+    case "lotus":
+      return ENDPOINT.lotus_thumbnail;
+    case "owl":
+      return ENDPOINT.owl_thumbnail;
+    case "superior":
+      return ENDPOINT.superior_thumbnail;
     default:
       throw new Error(`Device type ${device_type} not supported`);
   }

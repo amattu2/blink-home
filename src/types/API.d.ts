@@ -71,11 +71,28 @@ type GetMediaApiResponse = {
   media: MediaEvent[];
 };
 
-type CommandApiResponse = {
+type CommandApiInitiateBody = {
   id: number;
   network_id: number;
   // TODO: Add more
   command: "thumbnail";
   // TODO: Add more states
   state: "new";
+  /**
+   * The response message, present for failed commands
+   */
+  message?: string;
+};
+
+type CommandStatusBody = {
+  complete: boolean;
+  /**
+   * The status of the command
+   *
+   * 0 - Success
+   */
+  status: number;
+  status_message: string;
+  status_code: string;
+  commands: object[];
 };

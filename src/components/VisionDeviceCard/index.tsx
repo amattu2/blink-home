@@ -28,8 +28,9 @@ const VisionDeviceCard = (
 
   const refreshThumbnail = async () => {
     const response = await updateThumbnailImage(network_id, id, type);
-    // TODO: watch the command status and refresh the thumbnail
-    console.log(response);
+    if (response && !!response) {
+      device.thumbnail = response;
+    }
   };
 
   useImperativeHandle(ref, () => ({ refreshThumbnail }), [id]);

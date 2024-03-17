@@ -1,7 +1,12 @@
 "use server";
 
 import { BASE_URL, ENDPOINT } from "./constants";
-import { buildIronSession, formatUrl, getRefreshThumbnailUrl } from "./utils";
+import {
+  buildIronSession,
+  formatUrl,
+  getRefreshThumbnailUrl,
+  getViewThumbnailUrl,
+} from "./utils";
 
 /**
  * Perform a login request
@@ -420,24 +425,22 @@ export const getThumbnailImage = async (
 };
 
 /**
- * Initiates the command to refresh the device thumbnail image
+ * Initiates the command to refresh the device thumbnail image and returns the updated image URL
  *
+ * @see getThumbnailImage
  * @param network_id The network that the device is on
  * @param device_id The device to update
  * @param device_type The type of device to update
- * @returns Proimse<CommandApiResponse>
+ * @returns The API URL to the updated thumbnail image
  */
 export const updateThumbnailImage = async (
   network_id: number,
   device_id: number,
   device_type: VisionDeviceType,
-): Promise<ApiSuccess<CommandApiResponse> | ApiError<CommandApiResponse>> => {
+): Promise<string | null> => {
   const session = await buildIronSession();
   if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
-    return {
-      status: "error",
-      message: `Incorrect login state: ${session.state}`,
-    };
+    return null;
   }
 
   const url = formatUrl(BASE_URL, getRefreshThumbnailUrl(device_type), {
@@ -454,18 +457,27 @@ export const updateThumbnailImage = async (
     },
   }).catch(() => null);
 
-  const json = await response?.json()?.catch(() => null);
-  if (!json?.id || json?.state !== "new") {
-    return {
-      status: "error",
-      message: json?.message ?? "Unknown error",
-    };
+  const json: CommandApiInitiateBody = await response
+    ?.json()
+    ?.catch(() => null);
+  if (!json?.id || (json?.state !== "new" && json?.command !== "thumbnail")) {
+    return null;
   }
 
-  return {
-    status: "ok",
-    ...(json as CommandApiResponse),
-  };
+  const commandStatus = await pollCommand(json.id, network_id);
+  if (!commandStatus) {
+    return null;
+  }
+
+  const thumbnailUrl = formatUrl("/", getViewThumbnailUrl(device_type), {
+    account_id: session.account.account_id,
+    tier: session?.account?.tier,
+    network_id,
+    device_id,
+    device_type,
+  });
+
+  return thumbnailUrl;
 };
 
 /**
@@ -554,4 +566,54 @@ export const getChangedMedia = async (
     status: "ok",
     media: json?.media,
   };
+};
+
+/**
+ * Utility function to poll for command completion
+ *
+ * @param command_id The command to poll
+ * @param network_id The network that the command was executed on
+ * @param attempts The number of attempts to poll for (delay is n*1000ms)
+ * @returns {Promise<boolean>} Whether the command completed or not
+ */
+export const pollCommand = async (
+  command_id: number,
+  network_id: number,
+  attempts = 5,
+): Promise<boolean> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return false;
+  }
+
+  const url = formatUrl(BASE_URL, ENDPOINT.command_status, {
+    account_id: session.account.account_id,
+    tier: session.account.tier,
+    command_id,
+    network_id,
+  });
+
+  for (let i = 0; i < attempts; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "TOKEN-AUTH": session.token,
+      },
+    }).catch(() => null);
+
+    // eslint-disable-next-line no-await-in-loop
+    const json: CommandStatusBody = await response?.json()?.catch(() => null);
+    if (json?.complete === true) {
+      return true;
+    }
+
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+  }
+
+  return false;
 };
