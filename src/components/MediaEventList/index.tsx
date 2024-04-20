@@ -107,7 +107,7 @@ const MediaEventList: FC<Props> = ({ since = getDateNDaysAgo(7) }) => {
     <div
       id="mediaEventList"
       style={{
-        height: 350,
+        maxHeight: 350,
         overflow: "auto",
         padding: "0 16px",
       }}
@@ -117,7 +117,11 @@ const MediaEventList: FC<Props> = ({ since = getDateNDaysAgo(7) }) => {
         hasMore={hasMore}
         next={loadMore}
         loader={null}
-        endMessage={<Divider plain>Nothing else to see here...</Divider>}
+        endMessage={
+          data.length > PAGINATION_SIZE ? (
+            <Divider plain>Nothing else to see here...</Divider>
+          ) : undefined
+        }
         scrollableTarget="mediaEventList"
       >
         <List
