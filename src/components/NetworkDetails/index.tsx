@@ -3,14 +3,24 @@ import { FC } from "react";
 
 type Props = {
   network: Network;
+  sync_module: SyncModule;
 };
 
-const NetworkDetails: FC<Props> = ({ network }) => {
+const NetworkDetails: FC<Props> = ({ network, sync_module }) => {
   const items: DescriptionsProps["items"] = [
     {
-      label: "ID",
-      key: "id",
-      children: network.id,
+      label: "Status",
+      key: "status",
+      children: (
+        <p style={{ textTransform: "capitalize" }}>
+          {sync_module?.status || "Offline"}
+        </p>
+      ),
+    },
+    {
+      label: "Armed",
+      key: "armed",
+      children: network.armed ? "Armed" : "Disarmed",
     },
     {
       label: "Timezone",
@@ -28,6 +38,7 @@ const NetworkDetails: FC<Props> = ({ network }) => {
     <Descriptions
       title={`${network.name} Network`}
       layout="vertical"
+      column={4}
       items={items}
       bordered
     />

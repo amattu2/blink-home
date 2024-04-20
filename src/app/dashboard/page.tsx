@@ -6,7 +6,7 @@ import VisionDeviceCard, {
 } from "@/components/VisionDeviceCard";
 import { STORAGE_KEYS } from "@/config/STORAGE_KEYS";
 import withAuth, { AuthHocProps } from "@/hocs/withAuth";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { aggregateVisionDevices } from "@/utils/dashboard";
 import {
@@ -18,6 +18,7 @@ import {
   Typography,
   Card,
   Button,
+  Flex,
 } from "antd";
 import NetworkDetails from "@/components/NetworkDetails";
 import Statistics from "@/components/Statistics";
@@ -29,11 +30,17 @@ const Dashboard: FC<AuthHocProps> = () => {
     STORAGE_KEYS.homescreen,
     null,
   );
+  const [updatingThumbnails, setUpdatingThumbnails] = useState<boolean>(false);
   const thumbnailRefs = useRef<Array<VisionCardMethods>>([]);
 
-  const refreshThumbnails = () => {
-    // TODO: await refreshThumbnail for each device
-    // thumbnailRefs?.current.forEach((ref) => ref?.refreshThumbnail());
+  const refreshThumbnails = async () => {
+    setUpdatingThumbnails(true);
+
+    await Promise.all(
+      thumbnailRefs.current.map((ref) => ref?.refreshThumbnail()),
+    );
+
+    setUpdatingThumbnails(false);
   };
 
   useEffect(() => {
@@ -73,11 +80,15 @@ const Dashboard: FC<AuthHocProps> = () => {
                     index !== homescreen.networks.length - 1 ? 16 : 0,
                 }}
               >
-                <NetworkDetails network={network} />
-                {/* TODO: move to sidepanel, this is for testing */}
-                <Button onClick={refreshThumbnails}>
-                  Refresh All Thumbnails
-                </Button>
+                <NetworkDetails
+                  network={network}
+                  sync_module={
+                    homescreen.sync_modules.filter(
+                      (m) => m.network_id === network.id,
+                    )?.[0]
+                  }
+                />
+                <br />
                 <List
                   grid={{ gutter: 16, lg: 2, md: 1, sm: 1, xs: 1 }}
                   dataSource={aggregateVisionDevices(network.id, homescreen)}
@@ -92,26 +103,22 @@ const Dashboard: FC<AuthHocProps> = () => {
                     </List.Item>
                   )}
                 />
-                <Row gutter={[16, 16]}>
-                  {homescreen.sync_modules
-                    .filter((m) => m.network_id === network.id)
-                    .map((module) => (
-                      <Col key={module.id}>
-                        <p>Module {module.serial}</p>
-                        <p>{module.status}</p>
-                      </Col>
-                    ))}
-                </Row>
               </Card>
             ))}
           </Section>
         </Col>
         <Col span={8}>
           <Section>
-            <Card title="Networks">
-              networks as a list
-              <p>...</p>
-              <p>...</p>
+            <Card title="Actions">
+              <Flex gap="small" wrap="wrap">
+                <Button
+                  type="primary"
+                  onClick={refreshThumbnails}
+                  loading={updatingThumbnails}
+                >
+                  {updatingThumbnails ? "Refreshing..." : "Refresh"} Thumbnails
+                </Button>
+              </Flex>
             </Card>
           </Section>
           <Section>
