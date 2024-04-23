@@ -57,11 +57,11 @@ const VisionDeviceCard = (
             onConfirm={refreshThumbnail}
             okText="Yes"
             cancelText="No"
-            disabled={status !== "online"}
+            disabled={status === "offline"}
           >
             <CloudSyncOutlined key="setting" />
           </Popconfirm>,
-          <EditOutlined key="edit" disabled={status !== "online"} />,
+          <EditOutlined key="edit" disabled={status === "offline"} />,
         ]}
       >
         <Meta
