@@ -31,24 +31,36 @@ export const aggregateVisionDevices = (
  * Calculates the total number of devices tied to a Blink account
  *
  * @param homescreen The homescreen object to aggregate from
- * @returns The total number of devices
+ * @returns The total number of devices online and offline
  */
-export const getDeviceCount = (homescreen: Homescreen): number => {
-  let count = 0;
+export const getDeviceCount = (
+  homescreen: Homescreen,
+): [total: number, offline: number] => {
+  let totalCount = 0;
+  let offlineCount = 0;
 
   if (homescreen?.doorbells) {
-    count += homescreen.doorbells.length;
+    totalCount += homescreen.doorbells.length;
+    offlineCount += homescreen.doorbells.filter(
+      (d) => d?.status !== "done",
+    ).length;
   }
 
   if (homescreen?.owls) {
-    count += homescreen.owls.length;
+    totalCount += homescreen.owls.length;
+    offlineCount += homescreen.owls.filter(
+      (d) => d?.status !== "online",
+    ).length;
   }
 
   if (homescreen?.sync_modules) {
-    count += homescreen.sync_modules.length;
+    totalCount += homescreen.sync_modules.length;
+    offlineCount += homescreen.sync_modules.filter(
+      (d) => d?.status !== "online",
+    ).length;
   }
 
-  return count;
+  return [totalCount, offlineCount];
 };
 
 /**

@@ -1,5 +1,5 @@
 import React, { FC, useImperativeHandle } from "react";
-import { Card, Popconfirm, Tag } from "antd";
+import { Card, Popconfirm, Tag, notification } from "antd";
 import { EditOutlined, CloudSyncOutlined } from "@ant-design/icons";
 import Thumbnail from "@/components/Thumbnail";
 import { updateThumbnailImage } from "@/api/actions";
@@ -24,46 +24,63 @@ const VisionDeviceCard = (
   { device }: Props<BaseVisionDevice<unknown>>,
   ref: React.Ref<VisionCardMethods>,
 ) => {
-  const { name, thumbnail, updated_at, type, id, network_id } = device;
+  const { name, thumbnail, updated_at, type, id, network_id, status } = device;
+  const [api, contextHolder] = notification.useNotification();
 
   const refreshThumbnail = async () => {
     const response = await updateThumbnailImage(network_id, id, type);
     if (response && !!response) {
       device.thumbnail = response;
+    } else {
+      api.error({
+        message: "Failed to refresh thumbnail",
+        description: `An error occurred while refreshing the thumbnail for device "${name}"`,
+      });
     }
   };
 
   useImperativeHandle(ref, () => ({ refreshThumbnail }), [id]);
 
   return (
-    <Card
-      style={{ width: 560 }}
-      cover={<Thumbnail src={thumbnail} alt={name} width={560} height={315} />}
-      actions={[
-        <Popconfirm
-          key="sync"
-          title="Refresh thumbnail?"
-          description="Are you sure to refresh this thumbnail?"
-          onConfirm={refreshThumbnail}
-          okText="Yes"
-          cancelText="No"
-        >
-          <CloudSyncOutlined key="setting" />
-        </Popconfirm>,
-        <EditOutlined key="edit" />,
-      ]}
-    >
-      <Meta
-        title={name}
-        description={
-          <>
-            <p>Last updated at {updated_at}</p>
-            <Tag>{type}</Tag>
-            <Tag>#{id}</Tag>
-          </>
+    <>
+      {contextHolder}
+      <Card
+        style={{ width: 560 }}
+        cover={
+          <Thumbnail src={thumbnail} alt={name} width={560} height={315} />
         }
-      />
-    </Card>
+        actions={[
+          <Popconfirm
+            key="sync"
+            title="Refresh thumbnail?"
+            description="Are you sure to refresh this thumbnail?"
+            onConfirm={refreshThumbnail}
+            okText="Yes"
+            cancelText="No"
+            disabled={status !== "online"}
+          >
+            <CloudSyncOutlined key="setting" />
+          </Popconfirm>,
+          <EditOutlined key="edit" disabled={status !== "online"} />,
+        ]}
+      >
+        <Meta
+          title={name}
+          description={
+            <>
+              <p>Last updated {updated_at}</p>
+              <Tag>{type}</Tag>
+              <Tag>#{id}</Tag>
+              {status === "offline" && (
+                <Tag color="error" style={{ fontWeight: "bold" }}>
+                  Offline
+                </Tag>
+              )}
+            </>
+          }
+        />
+      </Card>
+    </>
   );
 };
 

@@ -32,10 +32,12 @@ type BaseDevice<T> = {
   network_id: number;
   onboarded: boolean;
   revision: string;
-  status: "done" | "online";
+  status: DeviceStatus;
   type: DeviceType;
   updated_at: string;
 } & T;
+
+type DeviceStatus = "done" | "online" | "offline";
 
 /**
  * Defines a base model for all Blink Vision devices.
@@ -59,6 +61,7 @@ type Doorbell = BaseVisionDevice<{
   signals: DeviceSignals;
   snooze: boolean;
   snooze_time_remaining: number | null;
+  status: Extract<DeviceStatus, "done" | "offline">;
   type: "doorbell";
 }>;
 

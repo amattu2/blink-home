@@ -18,7 +18,10 @@ const HeaderStyles: CSSProperties = {
  * @returns {React.FC<Props>}
  */
 const Statistics: FC<Props> = ({ home }) => {
-  const deviceCount: number = useMemo(() => getDeviceCount(home), [home]);
+  const deviceCount: [number, number] = useMemo(
+    () => getDeviceCount(home),
+    [home],
+  );
 
   return (
     <Card>
@@ -34,10 +37,14 @@ const Statistics: FC<Props> = ({ home }) => {
           />
         </Col>
         <Col span="5">
-          <Statistic title="Devices" value={deviceCount} precision={0} />
+          <Statistic title="Devices" value={deviceCount[0]} precision={0} />
         </Col>
         <Col span="5">
-          <Statistic title="[PLACEHOLDER]" value={0} precision={0} />
+          <Statistic
+            title="Offline Devices"
+            value={deviceCount[1]}
+            precision={0}
+          />
         </Col>
         <Col span="5">
           <Statistic title="[PLACEHOLDER]" value={0} precision={0} />
