@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { CSSProperties, FC } from "react";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: process.env.APP_NAME,
   description:
@@ -11,7 +13,7 @@ const RootStyling: CSSProperties = {
   margin: 0,
   padding: 0,
   fontFamily: "sans-serif",
-  backgroundColor: "#3b3b3b",
+  backgroundColor: "#f2f2f2",
 };
 
 const RootLayout: FC<{ children: React.ReactNode }> = ({ children }) => (

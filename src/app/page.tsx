@@ -1,5 +1,5 @@
-"use client";
+import page from "@/app/dashboard/page";
 
-export default function Home() {
-  return <main>home</main>;
-}
+export const runtime = "edge";
+
+export default page;

@@ -49,7 +49,7 @@ const Register: FC = () => {
   useEffect(() => {
     (async () => {
       const { countries } = await getCountries();
-      setCountries(countries);
+      setCountries(countries || []);
     })();
   }, []);
 
