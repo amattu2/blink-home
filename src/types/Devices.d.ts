@@ -12,10 +12,6 @@ type DeviceType =
 
 /**
  * Blink devices that are vision-based
- *
- * Lotus: Doorbell
- * Owl: Indoor Camera
- * Superior: Floodlight
  */
 type VisionDeviceType = "lotus" | "owl" | "superior";
 
@@ -50,7 +46,7 @@ type BaseVisionDevice<T> = Omit<BaseDevice<T>, "type"> & {
 };
 
 type Doorbell = BaseVisionDevice<{
-  battery: "ok";
+  battery: BatteryState;
   changing_mode: boolean;
   color: "black" | "white";
   config_out_of_sync: boolean;
@@ -105,3 +101,5 @@ type DeviceLimits = {
   siren: number;
   total_devices: number;
 };
+
+type BatteryState = "ok" | "low";
