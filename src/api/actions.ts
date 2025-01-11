@@ -21,7 +21,7 @@ export const login = async (
   password: string,
   extras: Omit<
     LoginApiBody,
-    "email" | "password" | "unique_Id" | "client_name" | "reauth"
+    "email" | "password" | "unique_id" | "client_name" | "reauth"
   >,
 ): Promise<ApiSuccess<LoginApiResponse> | ApiError<LoginApiResponse>> => {
   const session = await buildIronSession();
@@ -43,7 +43,7 @@ export const login = async (
       email,
       password,
       ...extras,
-      unique_Id: session.client_id,
+      unique_id: session.client_id,
       client_name: process.env.CLIENT_NAME,
       reauth: session.reauth,
     }),
@@ -175,11 +175,14 @@ export const logout = async (): Promise<
   ApiSuccess<LogoutApiResponse> | ApiError<LogoutApiResponse>
 > => {
   const session = await buildIronSession();
-  if (session.state !== "TWO_FACTOR" || !session.account || !session.token) {
+
+  // Skip the logout if the session isn't active
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
     const oldId = session.client_id;
     session.destroy();
     session.client_id = oldId;
     session.state = "LOGGED_OUT";
+    session.reauth = false;
     await session.save();
 
     return {
@@ -358,7 +361,7 @@ export const register = async (
       password_confirm,
       country,
       ...extras,
-      unique_Id: session.client_id,
+      unique_id: session.client_id,
       client_name: process.env.CLIENT_NAME,
       reauth: session.reauth,
     }),
