@@ -106,3 +106,24 @@ export const getEventSource = (source: MediaEvent["source"]): string => {
       return source || "Unknown";
   }
 };
+
+/**
+ * Translate the internal device type to the human-readable name
+ *
+ * @param type The device type
+ * @returns The human-readable device name or fallback to input
+ */
+export const getDeviceNameFromType = (type: DeviceType): string => {
+  switch (type) {
+    case "doorbell":
+    case "doorbell_button":
+    case "lotus":
+      return "Doorbell";
+    case "owl":
+      return "Mini";
+    case "superior":
+      return "Floodlight";
+    default:
+      return type || "Unknown";
+  }
+};

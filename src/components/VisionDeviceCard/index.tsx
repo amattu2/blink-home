@@ -1,7 +1,8 @@
-import React, { FC, useImperativeHandle } from "react";
+import React, { FC, useImperativeHandle, useMemo } from "react";
 import { Card, Popconfirm, Tag, notification } from "antd";
 import { EditOutlined, CloudSyncOutlined } from "@ant-design/icons";
 import { updateThumbnailImage } from "@/api/actions";
+import { getDeviceNameFromType } from "@/utils/dashboard";
 import ThumbnailWrapper from "./ThumbnailWrapper";
 
 const { Meta } = Card;
@@ -26,6 +27,19 @@ const VisionDeviceCard = (
 ) => {
   const { name, thumbnail, updated_at, type, id, network_id, status } = device;
   const [api, contextHolder] = notification.useNotification();
+
+  const batteryState = useMemo<string | null>(() => {
+    if (!("battery" in device) || typeof device?.battery !== "string") {
+      return null;
+    }
+
+    const battery = device.battery as BatteryState;
+    if (battery === "low") {
+      return "Low Battery";
+    }
+
+    return null;
+  }, [device]);
 
   const refreshThumbnail = async () => {
     const response = await updateThumbnailImage(network_id, id, type);
@@ -67,8 +81,8 @@ const VisionDeviceCard = (
           description={
             <>
               <p>Last updated {updated_at}</p>
-              <Tag>{type}</Tag>
-              <Tag>#{id}</Tag>
+              <Tag>{getDeviceNameFromType(type)}</Tag>
+              {batteryState && <Tag color="orange">{batteryState}</Tag>}
               {status === "offline" && (
                 <Tag color="error" style={{ fontWeight: "bold" }}>
                   Offline
