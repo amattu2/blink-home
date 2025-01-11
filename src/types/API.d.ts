@@ -24,7 +24,7 @@ type ApiError<T> = BaseResponse & {
 type LoginApiBody = {
   email: string;
   password: string;
-  unique_Id?: string;
+  unique_id?: string;
   client_type?: "amazon" | "android";
   client_name?: string;
   device_identifier?: string;
