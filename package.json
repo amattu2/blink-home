@@ -17,7 +17,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
     "antd": "^5.12.4",
-    "iron-session": "^8.0.1",
+    "iron-session": "^8.0.4",
     "next": "14.2.21",
     "react": "^18",
     "react-dom": "^18",
