@@ -1,7 +1,8 @@
-import React, { memo, useCallback, useMemo, useState } from "react";
-import { ImageProps, Skeleton, Space, Tooltip } from "antd";
+import React, { memo, useCallback, useMemo, useRef, useState } from "react";
+import { ImageProps, Space, Tooltip } from "antd";
 import { PauseOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import Thumbnail from "@/components/Thumbnail";
+import StreamPlayer, { StreamPlayerMethods } from "../StreamPlayer";
 
 export type ThumbnailWrapperProps = {
   /**
@@ -12,6 +13,10 @@ export type ThumbnailWrapperProps = {
    * The alt text for the thumbnail image
    */
   alt: string;
+  /**
+   * The device associated with the thumbnail
+   */
+  device: BaseVisionDevice<unknown>;
 };
 
 const PreviewMask: React.FC = () => (
@@ -29,12 +34,17 @@ const PreviewMask: React.FC = () => (
 const ThumbnailWrapper: React.FC<ThumbnailWrapperProps> = ({
   thumbnail,
   alt,
+  device,
 }) => {
   const [, setVisible] = useState<boolean>(false);
+  const streamMethods = useRef<StreamPlayerMethods>(null);
 
   const handleVisibleChange = useCallback(
     (visible: boolean) => {
       setVisible(visible);
+      if (!visible) {
+        streamMethods.current?.pause();
+      }
     },
     [setVisible],
   );
@@ -51,8 +61,14 @@ const ThumbnailWrapper: React.FC<ThumbnailWrapperProps> = ({
   );
 
   const handlePreviewRender = useCallback(
-    // TODO: Render skeleton image while loading, destroy stream on close
-    () => <Skeleton.Image active style={{ width: 560, height: 315 }} />,
+    () => (
+      <StreamPlayer
+        network_id={device.network_id}
+        device_id={device.id}
+        device_type={device.type}
+        ref={streamMethods}
+      />
+    ),
     [],
   );
 

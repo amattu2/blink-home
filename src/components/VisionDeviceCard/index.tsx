@@ -60,7 +60,9 @@ const VisionDeviceCard = (
       {contextHolder}
       <Card
         style={{ width: 560 }}
-        cover={<ThumbnailWrapper thumbnail={thumbnail} alt={name} />}
+        cover={
+          <ThumbnailWrapper thumbnail={thumbnail} alt={name} device={device} />
+        }
         actions={[
           <Popconfirm
             key="sync"
