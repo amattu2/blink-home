@@ -156,9 +156,11 @@ const StreamPlayer = (
         if (response.command === "liveview:stop") {
           console.debug("Live stream stopped by server");
           setStreaming(false);
+          setPlaying(false);
         } else if (response.command === "liveview:start") {
           console.debug("Live stream started successfully");
           setStreaming(true);
+          setPlaying(true);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);

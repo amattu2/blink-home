@@ -37,27 +37,45 @@ const ThumbnailWrapper: React.FC<ThumbnailWrapperProps> = ({
   device,
 }) => {
   const [, setVisible] = useState<boolean>(false);
+
   const streamMethods = useRef<StreamPlayerMethods>(null);
+  const isPlaying = useMemo<boolean>(
+    () => streamMethods.current?.playing ?? false,
+    [streamMethods.current],
+  );
 
   const handleVisibleChange = useCallback(
-    (visible: boolean) => {
-      setVisible(visible);
-      if (!visible) {
-        streamMethods.current?.pause();
-      }
-    },
+    (visible: boolean) => setVisible(visible),
     [setVisible],
   );
+
+  const handlePause = useCallback(() => {
+    if (streamMethods.current) {
+      streamMethods.current.pause();
+    }
+  }, [streamMethods]);
+
+  const handlePlay = useCallback(() => {
+    if (streamMethods.current) {
+      streamMethods.current.resume();
+    }
+  }, [streamMethods]);
 
   const handleToolbarRender = useCallback(
     () => (
       <Space size={12}>
-        {/* TODO: Switch icon based on stream state */}
-        <PauseOutlined style={{ fontSize: 18 }} />
-        <PlayCircleOutlined style={{ fontSize: 18 }} />
+        {isPlaying ? (
+          <Tooltip title="Pause">
+            <PauseOutlined style={{ fontSize: 24 }} onClick={handlePause} />
+          </Tooltip>
+        ) : (
+          <Tooltip title="Play">
+            <PlayCircleOutlined style={{ fontSize: 24 }} onClick={handlePlay} />
+          </Tooltip>
+        )}
       </Space>
     ),
-    [],
+    [isPlaying, handlePause, handlePlay],
   );
 
   const handlePreviewRender = useCallback(
@@ -69,7 +87,7 @@ const ThumbnailWrapper: React.FC<ThumbnailWrapperProps> = ({
         ref={streamMethods}
       />
     ),
-    [],
+    [device.network_id, device.id, device.type],
   );
 
   const previewOptions = useMemo<ImageProps["preview"]>(
