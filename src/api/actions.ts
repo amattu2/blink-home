@@ -620,3 +620,48 @@ export const pollCommand = async (
 
   return false;
 };
+
+/**
+ * A utility function to get the live stream configuration for a device
+ *
+ * @param network_id The network that the device is on
+ * @param device_id The device to get the live stream configuration for
+ * @param device_type The type of device to get the live stream configuration for
+ * @returns {Promise<GetLiveStreamConfigApiResponse>}
+ */
+export const getLiveStreamConfig = async (
+  network_id: number,
+  device_id: number,
+  device_type: VisionDeviceType,
+): Promise<
+  | ApiSuccess<GetLiveStreamConfigApiResponse>
+  | ApiError<GetLiveStreamConfigApiResponse>
+> => {
+  const session = await buildIronSession();
+  if (session.state !== "LOGGED_IN" || !session.account || !session.token) {
+    return {
+      status: "error",
+      message: `Incorrect login state: ${session.state}`,
+    };
+  }
+
+  if (!process.env.LIVEVIEW_MIDDLEWARE_URL) {
+    return {
+      status: "error",
+      message: "Liveview is not available",
+    };
+  }
+
+  return {
+    status: "ok",
+    data: {
+      stream_url: process.env.LIVEVIEW_MIDDLEWARE_URL,
+      account_tier: session.account.tier,
+      api_token: session.token,
+      account_id: session.account.account_id.toString(),
+      network_id: network_id.toString(),
+      camera_id: device_id.toString(),
+      camera_type: device_type,
+    },
+  };
+};

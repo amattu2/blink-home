@@ -26,6 +26,7 @@ cp .env.local.example .env.local
 | --- | --- |
 |APP_NAME|The name of the application|
 |CLIENT_NAME|The name of the client passed to the Blink API. Should be consistent in order to persist sessions|
+|LIVEVIEW_MIDDLEWARE_URL|The URL of the live view middleware WebSocket server. Refer to <https://github.com/amattu2/blink-liveview-middleware>. If empty, liveview is disabled.|
 |SESSION_PASSWORD|The password used to encrypt the session cookie. Recommend a long and random password|
 |SESSION_COOKIE_NAME|The name of the session cookie|
 

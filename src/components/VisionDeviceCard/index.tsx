@@ -1,9 +1,9 @@
 import React, { FC, useImperativeHandle, useMemo } from "react";
 import { Card, Popconfirm, Tag, notification } from "antd";
 import { EditOutlined, CloudSyncOutlined } from "@ant-design/icons";
-import Thumbnail from "@/components/Thumbnail";
 import { updateThumbnailImage } from "@/api/actions";
 import { getDeviceNameFromType } from "@/utils/dashboard";
+import ThumbnailWrapper from "./ThumbnailWrapper";
 
 const { Meta } = Card;
 
@@ -61,7 +61,7 @@ const VisionDeviceCard = (
       <Card
         style={{ width: 560 }}
         cover={
-          <Thumbnail src={thumbnail} alt={name} width={560} height={315} />
+          <ThumbnailWrapper thumbnail={thumbnail} alt={name} device={device} />
         }
         actions={[
           <Popconfirm

@@ -71,6 +71,23 @@ type GetMediaApiResponse = {
   media: MediaEvent[];
 };
 
+type GetLiveStreamConfigApiResponse = {
+  data: LivestreamConfig;
+};
+
+type LivestreamConfig = {
+  /**
+   * The WebSocket URL for the live stream
+   */
+  stream_url: string;
+  account_tier: string;
+  api_token: string;
+  account_id: string;
+  network_id: string;
+  camera_id: string;
+  camera_type: DeviceType;
+};
+
 type CommandApiInitiateBody = {
   id: number;
   network_id: number;
